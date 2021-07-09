@@ -3,9 +3,9 @@ using BillingAPI.ViewModels;
 
 namespace BillingAPI.Models.Responses
 {
-    public class BillingResponse : BaseResponse<Billing>
+    public class BillingResponse : BaseResponse<object>
     {
-        public BillingResponse(Billing client) : base(client)
+        public BillingResponse(object client) : base(client)
         {
         }
 

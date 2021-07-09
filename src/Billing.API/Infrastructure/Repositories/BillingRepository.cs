@@ -23,11 +23,27 @@ namespace BillingAPI.Infrastructure.Repositories
             await _billingContext.Billings.InsertOneAsync(billing);
         }
 
-        public async Task<IEnumerable<Billing>> Get(string cpf, DateTime mesReferencia)
+        public async Task<IEnumerable<Billing>> Get(string cpf, string mesReferencia)
         {
-            var filterCpf = Builders<Billing>.Filter.In("Cpf", cpf);
-            var filterDate = Builders<Billing>.Filter.Gte(x => x.DataVencimento, new BsonDateTime(mesReferencia));
-            var filter = Builders<Billing>.Filter.And(filterCpf, filterDate);
+            var filterBuilder = Builders<Billing>.Filter;
+            var filter = filterBuilder.Empty;
+
+            if (!string.IsNullOrWhiteSpace(cpf))
+            {
+                var cpfFilter = filterBuilder.Eq(x => x.Cpf, long.Parse(cpf));
+                filter &= cpfFilter;
+            }
+
+            if (!string.IsNullOrWhiteSpace(mesReferencia))
+            {
+                var splitMesReferencia = mesReferencia.Split('/');
+                var start = new DateTime(int.Parse(splitMesReferencia[1]), int.Parse(splitMesReferencia[0]), 01);
+                var end = new DateTime(int.Parse(splitMesReferencia[1]), int.Parse(splitMesReferencia[0]), DateTime.DaysInMonth(int.Parse(splitMesReferencia[1]), int.Parse(splitMesReferencia[0])));
+                var dateFilter = filterBuilder.Gte(x => x.DataVencimento, new BsonDateTime(start)) &
+                         filterBuilder.Lte(x => x.DataVencimento, new BsonDateTime(end));
+                filter &= dateFilter;
+            }
+
             return await _billingContext.Billings.Find(filter).ToListAsync();
         }
     }

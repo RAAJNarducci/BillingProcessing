@@ -8,6 +8,6 @@ namespace BillingAPI.Infrastructure.Repositories
     public interface IBillingRepository
     {
         Task Insert(Billing billing);
-        Task<IEnumerable<Billing>> Get(string cpf, DateTime mesReferencia);
+        Task<IEnumerable<Billing>> Get(string cpf, string mesReferencia);
     }
 }

@@ -17,8 +17,8 @@ namespace BillingAPI.Queries
 
         public async Task<BillingResponse> Get(BillingViewModel billingViewModel)
         {
-            var teste = await _billingRepository.Get(billingViewModel.Cpf, billingViewModel.DataVencimento);
-            return new BillingResponse("Teste");
+            var billings = await _billingRepository.Get(billingViewModel.Cpf, billingViewModel.MesReferencia);
+            return new BillingResponse(billings);
         }
     }
 }

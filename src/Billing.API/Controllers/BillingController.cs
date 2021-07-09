@@ -1,6 +1,9 @@
 ﻿using BillingAPI.Commands;
+using BillingAPI.Models;
+using BillingAPI.Models.Responses;
 using BillingAPI.Queries;
 using BillingAPI.ViewModels;
+using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -26,8 +29,20 @@ namespace BillingAPI.Controllers
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] BillingViewModel billingViewModel)
         {
-            var tst = await _billingQueries.Get(billingViewModel);
-            return Ok();
+            ValidationResult validation = new BillingViewModelValidator().Validate(billingViewModel);
+            if (!validation.IsValid)
+                return BadRequest(new BillingResponse("Pelo menos um dos filtros é obrigatório"));
+
+            var response = await _billingQueries.Get(billingViewModel);
+
+            if (!response.IsSuccess)
+                return BadRequest(response.Message);
+
+            var result = (IEnumerable<Billing>)response.Result;
+            if (!result.Any())
+                return NotFound();
+            else
+                return Ok(response.Result);
         }
 
         [HttpPost]
