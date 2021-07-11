@@ -48,15 +48,53 @@ namespace Client.API.Tests
             Assert.Equal(errorsMessage, client.ValidationResult.Errors.Select(x => x.ErrorMessage));
         }
 
-        [Theory(DisplayName = "Novo Cliente - Estado Vazio ou Nulo")]
-        [InlineData(null)]
+        [Theory(DisplayName = "Novo Cliente - Estado Vazio")]
         [InlineData("")]
         public void Client_NewClient_EstadoNullOrEmpty(string estado)
         {
             var fakePerson = new Faker().Person;
             var errorsMessage = new List<string>
             {
-                 "O campo Estado é obrigatório"
+                 "O campo Estado é obrigatório",
+                 "O Estado deve estar no padrão UF",
+                 "UF inválido"
+            };
+
+            var client = new Models.Client(fakePerson.FirstName, estado, 91570444064);
+
+            var result = client.IsValid();
+
+            Assert.False(result);
+            Assert.Equal(errorsMessage, client.ValidationResult.Errors.Select(x => x.ErrorMessage));
+        }
+
+        [Theory(DisplayName = "Novo Cliente - Estado padrão inválido")]
+        [InlineData("J")]
+        public void Client_NewClient_EstadoInvalid(string estado)
+        {
+            var fakePerson = new Faker().Person;
+            var errorsMessage = new List<string>
+            {
+                 "O Estado deve estar no padrão UF",
+                 "UF inválido"
+            };
+
+            var client = new Models.Client(fakePerson.FirstName, estado, 91570444064);
+
+            var result = client.IsValid();
+
+            Assert.False(result);
+            Assert.Equal(errorsMessage, client.ValidationResult.Errors.Select(x => x.ErrorMessage));
+        }
+
+        [Theory(DisplayName = "Novo Cliente - Estado inválido")]
+        [InlineData("JJ")]
+        public void Client_NewClient_UFInvalid(string estado)
+        {
+            var fakePerson = new Faker().Person;
+            var errorsMessage = new List<string>
+            {
+                 "UF inválido"
             };
 
             var client = new Models.Client(fakePerson.FirstName, estado, 91570444064);

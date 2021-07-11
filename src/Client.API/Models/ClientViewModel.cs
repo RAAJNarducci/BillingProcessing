@@ -10,6 +10,7 @@ namespace Client.API.Models
 
         [StringLength(2, ErrorMessage = "O Estado deve estar no padrão UF")]
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [RegularExpression(RegexValidations.REGEX_UF, ErrorMessage = "UF inválido")]
         public string Estado { get; set; }
 
         [RegularExpression(RegexValidations.REGEX_CPF, ErrorMessage = "CPF no formato incorreto")]

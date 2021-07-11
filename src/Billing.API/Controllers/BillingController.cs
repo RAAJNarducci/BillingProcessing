@@ -9,11 +9,12 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace BillingAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/cobranca")]
     [ApiController]
     public class BillingController : ControllerBase
     {
@@ -27,6 +28,9 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(IEnumerable<BillingViewModel>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Get([FromQuery] BillingViewModel billingViewModel)
         {
             ValidationResult validation = new BillingViewModelValidator().Validate(billingViewModel);
@@ -40,12 +44,14 @@ namespace BillingAPI.Controllers
 
             var result = (IEnumerable<Billing>)response.Result;
             if (!result.Any())
-                return NotFound();
+                return NoContent();
             else
                 return Ok(response.Result);
         }
 
         [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult> Post([FromBody] NewBillingCommand newBillingCommand)
         {
             var response = await _mediator.Send(newBillingCommand);
