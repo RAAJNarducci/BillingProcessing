@@ -1,8 +1,8 @@
 ﻿namespace Client.API.Models
 {
-    public class ClientResponse : BaseResponse<ClientViewModel>
+    public class ClientResponse : BaseResponse<object>
     {
-        public ClientResponse(ClientViewModel client) : base(client)
+        public ClientResponse(object client) : base(client)
         {
         }
 

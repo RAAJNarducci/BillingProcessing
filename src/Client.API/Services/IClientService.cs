@@ -7,5 +7,6 @@ namespace Client.API.Services
     {
         Task<ClientResponse> Insert(ClientViewModel clientViewModel);
         Task<ClientResponse> GetByCpf(long cpf);
+        Task<ClientResponse> GetAll();
     }
 }

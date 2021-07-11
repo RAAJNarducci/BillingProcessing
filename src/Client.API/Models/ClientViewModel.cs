@@ -22,7 +22,6 @@ namespace Client.API.Models
     {
         [RegularExpression(RegexValidations.REGEX_CPF, ErrorMessage = "CPF no formato incorreto")]
         [CpfValidation(ErrorMessage = "CPF inválido")]
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
         public string Cpf { get; set; }
     }
 
@@ -30,6 +29,9 @@ namespace Client.API.Models
     {
         public override bool IsValid(object cpf)
         {
+            if (cpf is null)
+                return true;
+
             return CpfValidator.IsValid(cpf.ToString());
         }
     }

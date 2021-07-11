@@ -5,6 +5,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -53,6 +54,13 @@ namespace Client.API.Services
         {
             var client = await _clientContext.Clients.FirstOrDefaultAsync(c => c.Cpf == cpf);
             return new ClientResponse(_mapper.Map<ClientViewModel>(client));
+        }
+
+        public async Task<ClientResponse> GetAll()
+        {
+            IQueryable<Models.Client> queryable = _clientContext.Clients.AsNoTracking();
+            await queryable.ToListAsync();
+            return new ClientResponse(_mapper.Map<IEnumerable<ClientViewModel>>(queryable));
         }
 
         private async Task<bool> IsClientDuplicated(long cpf)

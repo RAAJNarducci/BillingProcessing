@@ -1,6 +1,8 @@
 ﻿using Client.API.Models;
 using Client.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -23,7 +25,13 @@ namespace Client.API.Controllers
         [ProducesResponseType(typeof(ClientViewModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get([FromQuery] ClientCpfViewModel clientCpfViewModel)
         {
-            var response = await _clientService.GetByCpf(long.Parse(clientCpfViewModel.Cpf));
+            ClientResponse response;
+
+            if (string.IsNullOrEmpty(clientCpfViewModel.Cpf))
+                response = await _clientService.GetAll();
+            else
+                response = await _clientService.GetByCpf(long.Parse(clientCpfViewModel.Cpf));
+
             if (!response.IsSuccess)
                 return BadRequest(response.Message);
             else if (response.Result is null)
