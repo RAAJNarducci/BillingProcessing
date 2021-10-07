@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Client.API.Infrastructure;
+using Client.API.Infrastructure.Repositories;
 using Client.API.Models;
 using FluentValidation;
 using FluentValidation.Results;
@@ -17,14 +18,12 @@ namespace Client.API.Services
         private const string MSG_CLIENTE_JA_CADASTRADO = "Cliente já cadastrado";
 
         private readonly IMapper _mapper;
-        private readonly ClientContext _clientContext;
-        private readonly IValidator<Models.Client> _clientValidator;
+        private readonly IClientRepository _clientRepository;
 
-        public ClientService(IMapper mapper, ClientContext clientContext, IValidator<Models.Client> clientValidator)
+        public ClientService(IMapper mapper, IClientRepository clientRepository)
         {
-            _clientContext = clientContext;
+            _clientRepository = clientRepository;
             _mapper = mapper;
-            _clientValidator = clientValidator;
         }
 
         public async Task<ClientResponse> Insert(ClientViewModel clientViewModel)
@@ -32,16 +31,15 @@ namespace Client.API.Services
             try
             {
                 var client = _mapper.Map<Models.Client>(clientViewModel);
-                ValidationResult validationResult = await _clientValidator.ValidateAsync(client);
 
-                if (!validationResult.IsValid)
-                    return new ClientResponse(validationResult.Errors.Select(x => x.ErrorMessage).ToArray());
+                if (!client.IsValid())
+                    return new ClientResponse(client.ValidationResult.Errors.Select(x => x.ErrorMessage).ToArray());
 
                 if (await IsClientDuplicated(client.Cpf))
                     return new ClientResponse(MSG_CLIENTE_JA_CADASTRADO);
 
-                await _clientContext.AddAsync(client);
-                await _clientContext.SaveChangesAsync();
+                await _clientRepository.Insert(client);
+
                 return new ClientResponse(clientViewModel);
             }
             catch (Exception ex)
@@ -52,15 +50,14 @@ namespace Client.API.Services
 
         public async Task<ClientResponse> GetByCpf(long cpf)
         {
-            var client = await _clientContext.Clients.FirstOrDefaultAsync(c => c.Cpf == cpf);
+            var client = await _clientRepository.GetByCpf(cpf);
             return new ClientResponse(_mapper.Map<ClientViewModel>(client));
         }
 
         public async Task<ClientResponse> GetAll()
         {
-            IQueryable<Models.Client> queryable = _clientContext.Clients.AsNoTracking();
-            await queryable.ToListAsync();
-            return new ClientResponse(_mapper.Map<IEnumerable<ClientViewModel>>(queryable));
+            var clients = await _clientRepository.GetAll();
+            return new ClientResponse(_mapper.Map<IEnumerable<ClientViewModel>>(clients));
         }
 
         private async Task<bool> IsClientDuplicated(long cpf)

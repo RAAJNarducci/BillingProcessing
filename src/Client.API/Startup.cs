@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Client.API.Services;
 using Client.API.Utils.Validators;
 using FluentValidation;
+using Client.API.Infrastructure.Repositories;
 
 namespace Client.API
 {
@@ -24,8 +25,6 @@ namespace Client.API
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IValidator<Models.Client>, ClientValidator>();
-
             services.AddAutoMapper(typeof(AutoMapperProfile));
 
             services.AddDbContext<ClientContext>(options =>
@@ -38,6 +37,7 @@ namespace Client.API
             });
 
             services.AddScoped<IClientService, ClientService>();
+            services.AddScoped<IClientRepository, ClientRepository>();
             services.AddScoped<ClientContext>();
         }
 
